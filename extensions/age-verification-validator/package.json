@@ -1,0 +1,7 @@
+{
+  "name": "age-verification-validator",
+  "version": "1.0.0",
+  "dependencies": {
+    "@shopify/shopify-function": "~2.0.0"
+  }
+}
