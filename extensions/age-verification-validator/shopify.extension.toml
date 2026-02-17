@@ -1,0 +1,12 @@
+api_version = "2024-01"
+
+[[extensions]]
+type = "function"
+name = "age-verification-validator"
+handle = "age-verification-validator"
+
+[[extensions.targeting]]
+target = "purchase.validation.run"
+
+[extensions.input]
+type = "validation"
