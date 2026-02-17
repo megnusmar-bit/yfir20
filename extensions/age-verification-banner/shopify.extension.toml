@@ -5,13 +5,8 @@ type = "ui_extension"
 name = "age-verification-banner"
 handle = "age-verification-banner"
 
-[extensions.targeting]
+[[extensions.targeting]]
 target = "purchase.checkout.block.render"
 
-[[extensions.capabilities.network_access]]
-purpose = "To verify customer age using Kenni"
-domains = [
-  "idp.kenni.is",
-  "kenni.is",
-  "your-app-url.com"
-]
+[extensions.capabilities]
+network_access = true

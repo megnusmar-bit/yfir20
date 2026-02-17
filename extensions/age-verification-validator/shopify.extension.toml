@@ -7,6 +7,3 @@ handle = "age-verification-validator"
 
 [[extensions.targeting]]
 target = "purchase.validation.run"
-
-[extensions.input]
-type = "validation"
