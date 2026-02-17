@@ -6,6 +6,7 @@ name = "age-verification-banner"
 handle = "age-verification-banner"
 
 [[extensions.targeting]]
+module = "./src/index.jsx"
 target = "purchase.checkout.block.render"
 
 [extensions.capabilities]
