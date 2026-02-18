@@ -112,16 +112,18 @@ app.post('/api/verify/start', async (req, res) => {
     const state = generators.state();
     const nonce = generators.nonce();
     
-    // Store state and session info
-    req.session.state = state;
-    req.session.nonce = nonce;
-    req.session.customerId = customerId;
-    req.session.checkoutToken = checkoutToken;
-    req.session.returnUrl = returnUrl || `${process.env.SHOPIFY_STORE_URL}/cart`;
+    // Encode state data as base64 to pass through OAuth flow
+    const stateData = {
+      state: state,
+      nonce: nonce,
+      returnUrl: returnUrl || `${process.env.SHOPIFY_STORE_URL}/cart`,
+      timestamp: Date.now()
+    };
+    const encodedState = Buffer.from(JSON.stringify(stateData)).toString('base64');
     
     const authUrl = audkenniClient.authorizationUrl({
       scope: 'openid national_id',
-      state: state,
+      state: encodedState,
       nonce: nonce
     });
     
@@ -136,10 +138,15 @@ app.post('/api/verify/start', async (req, res) => {
 app.get('/auth/callback', async (req, res) => {
   try {
     const params = audkenniClient.callbackParams(req);
+    
+    // Decode state data from base64
+    const encodedState = params.state;
+    const stateData = JSON.parse(Buffer.from(encodedState, 'base64').toString());
+    
     const tokenSet = await audkenniClient.callback(
       process.env.KENNI_REDIRECT_URI,
       params,
-      { state: req.session.state, nonce: req.session.nonce }
+      { state: stateData.state, nonce: stateData.nonce }
     );
     
     const userinfo = await audkenniClient.userinfo(tokenSet);
@@ -160,9 +167,7 @@ app.get('/auth/callback', async (req, res) => {
     verificationStore.set(verificationId, {
       verified: isVerified,
       age: age,
-      timestamp: Date.now(),
-      customerId: req.session.customerId,
-      checkoutToken: req.session.checkoutToken
+      timestamp: Date.now()
     });
     
     // Set verification cookie (accessible to JavaScript)
@@ -174,12 +179,8 @@ app.get('/auth/callback', async (req, res) => {
       domain: '.malbygg.is' // Works across subdomains
     });
     
-    // Also store in session for server-side checks
-    req.session.age_verified = true;
-    req.session.verification_age = age;
-    
-    // Redirect back to cart
-    const redirectUrl = req.session.returnUrl || `${process.env.SHOPIFY_STORE_URL}/cart`;
+    // Redirect back to cart using return URL from state
+    const redirectUrl = stateData.returnUrl || `${process.env.SHOPIFY_STORE_URL}/cart`;
     
     res.redirect(redirectUrl);
     
