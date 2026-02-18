@@ -4,11 +4,11 @@
   "description": "Shopify app for age verification using Auðkenni (Icelandic electronic ID)",
   "main": "server/index.js",
   "scripts": {
-    "dev": "shopify app dev",
-    "build": "shopify app build",
-    "deploy": "shopify app deploy",
-    "server": "node server/index.js"
-  },
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "shopify:dev": "shopify app dev",
+    "shopify:deploy": "shopify app deploy"
+},
   "keywords": [
     "shopify",
     "audkenni",
