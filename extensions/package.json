@@ -1,0 +1,35 @@
+{
+  "name": "audkenni-age-verification",
+  "version": "1.0.0",
+  "description": "Shopify app for age verification using Auðkenni (Icelandic electronic ID)",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "shopify app dev",
+    "build": "shopify app build",
+    "deploy": "shopify app deploy",
+    "server": "node server/index.js"
+  },
+  "keywords": [
+    "shopify",
+    "audkenni",
+    "age-verification",
+    "iceland"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@shopify/shopify-api": "^9.0.0",
+    "@shopify/app-bridge": "^3.7.0",
+    "express": "^4.18.2",
+    "dotenv": "^16.3.1",
+    "openid-client": "^5.6.1",
+    "express-session": "^1.17.3",
+    "cookie-parser": "^1.4.6",
+    "crypto": "^1.0.1",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@shopify/cli": "^3.50.0",
+    "nodemon": "^3.0.1"
+  }
+}

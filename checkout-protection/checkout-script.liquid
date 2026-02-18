@@ -1,0 +1,44 @@
+// Checkout Age Verification Protection
+// Add this to Settings > Checkout > Additional scripts
+
+(function() {
+  const VERIFICATION_COOKIE = 'age_verified';
+  const CART_PAGE = '/cart';
+  
+  // Check if cart has age-restricted items
+  function hasAgeRestrictedItems() {
+    // This data is available in Shopify checkout via Liquid
+    {% if checkout.line_items %}
+      {% for item in checkout.line_items %}
+        {% if item.product.tags contains 'age-restricted' or item.product.tags contains 'alcohol' or item.product.tags contains 'beer' %}
+          return true;
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+    return false;
+  }
+  
+  // Check if user is verified
+  function isVerified() {
+    return document.cookie.includes(`${VERIFICATION_COOKIE}=true`);
+  }
+  
+  // Initialize protection
+  function init() {
+    // Only run if we have age-restricted items
+    if (!hasAgeRestrictedItems()) {
+      return;
+    }
+    
+    // Check verification
+    if (!isVerified()) {
+      // Not verified - redirect back to cart
+      alert('Þú verður að staðfesta aldur þinn áður en þú getur haldið áfram.');
+      window.location.href = CART_PAGE;
+      return;
+    }
+  }
+  
+  // Run immediately
+  init();
+})();

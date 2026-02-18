@@ -88,7 +88,7 @@ app.get('/health', (req, res) => {
 // Start age verification process
 app.post('/api/verify/start', async (req, res) => {
   try {
-    const { customerId, checkoutToken } = req.body;
+    const { customerId, checkoutToken, returnUrl } = req.body;
     
     if (!customerId && !checkoutToken) {
       return res.status(400).json({ error: 'Customer ID or checkout token required' });
@@ -102,6 +102,7 @@ app.post('/api/verify/start', async (req, res) => {
     req.session.nonce = nonce;
     req.session.customerId = customerId;
     req.session.checkoutToken = checkoutToken;
+    req.session.returnUrl = returnUrl || `${process.env.SHOPIFY_STORE_URL}/cart`;
     
     const authUrl = audkenniClient.authorizationUrl({
       scope: 'openid national_id',
@@ -149,18 +150,21 @@ app.get('/auth/callback', async (req, res) => {
       checkoutToken: req.session.checkoutToken
     });
     
-    // Set verification cookie
-    res.cookie('age_verified', verificationId, {
+    // Set verification cookie (accessible to JavaScript)
+    res.cookie('age_verified', 'true', {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      httpOnly: true,
+      httpOnly: false, // Allow JavaScript access
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      sameSite: 'none', // Allow cross-site
+      domain: '.malbygg.is' // Works across subdomains
     });
     
-    // Redirect back to store
-    const redirectUrl = isVerified 
-      ? `${process.env.SHOPIFY_STORE_URL}/checkout?verified=true`
-      : `${process.env.SHOPIFY_STORE_URL}/pages/age-restricted`;
+    // Also store in session for server-side checks
+    req.session.age_verified = true;
+    req.session.verification_age = age;
+    
+    // Redirect back to cart
+    const redirectUrl = req.session.returnUrl || `${process.env.SHOPIFY_STORE_URL}/cart`;
     
     res.redirect(redirectUrl);
     
